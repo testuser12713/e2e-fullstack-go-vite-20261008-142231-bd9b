@@ -362,6 +362,12 @@ h3 {
   cursor: pointer;
 }
 
+.star-rating__star svg {
+  display: block;
+  width: 32px;
+  height: 32px;
+}
+
 .star-rating__star--filled {
   color: var(--color-star);
 }
@@ -372,6 +378,12 @@ h3 {
 
 .star-rating__star:disabled {
   cursor: default;
+  opacity: 0.45;
+}
+
+.star-rating__error {
+  font-size: 13px;
+  color: var(--color-danger);
 }
 
 .star-rating--readonly {
@@ -383,6 +395,11 @@ h3 {
   width: auto;
   height: auto;
   color: var(--color-star_empty);
+}
+
+.star-rating--readonly .star-rating__star svg {
+  width: 16px;
+  height: 16px;
 }
 
 .star-rating--readonly .star-rating__star--filled {
