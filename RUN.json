@@ -10,6 +10,8 @@
         [
           "go",
           "build",
+          "-o",
+          "./build/bookshelf",
           "./..."
         ]
       ],
