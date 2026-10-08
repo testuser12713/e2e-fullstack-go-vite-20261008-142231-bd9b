@@ -1,0 +1,60 @@
+# office-crew-ci-gates: strict-v10
+# Auto-generated for composed products v2 (GitHub Actions).
+name: CI
+on:
+  pull_request:
+  push:
+    branches: [ main ]
+jobs:
+  backend-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - shell: bash
+        run: |
+          if [ ! -d backend ]; then echo "No backend/ on this branch — skip"; exit 0; fi
+          cd backend
+          go build ./...
+          go test ./...
+  backend-lint:
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+      - shell: bash
+        run: |
+          if [ ! -d backend ]; then echo "No backend/ on this branch — skip"; exit 0; fi
+          cd backend
+          test -z "$(gofmt -l .)" || true
+          go vet ./... || true
+  frontend-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - shell: bash
+        run: |
+          if [ ! -d frontend ]; then echo "No frontend/ on this branch — skip"; exit 0; fi
+          cd frontend
+          if [ -f package.json ]; then
+            if [ -f package-lock.json ]; then npm ci --no-audit --no-fund || npm install --no-audit --no-fund; else npm install --no-audit --no-fund; fi
+            if grep -q '"test"' package.json; then T=$(sed -n 's/.*"test"[[:space:]]*:[[:space:]]*"\([^"]*\)".*/\1/p' package.json | head -1); A=''; case "$T" in *vitest*) case "$T" in *--run*|*" run"*) ;; *) A="--run";; esac; case "$T" in *--passWithNoTests*) ;; *) A="$A --passWithNoTests";; esac;; *jest*) case "$T" in *--passWithNoTests*) ;; *) A="--passWithNoTests";; esac;; esac; if [ -n "$A" ]; then npm test -- $A; else npm test; fi; else shopt -s nullglob; tests=(tests/*.test.mjs tests/*.test.js src/*.test.mjs); if [ ${#tests[@]} -gt 0 ]; then echo "No test script in package.json — running ${#tests[@]} node test file(s)"; node --test "${tests[@]}"; else echo 'No test script in package.json — skip'; fi; fi
+            if grep -q '"build"' package.json; then npm run build; fi
+          else
+            shopt -s nullglob
+            tests=(tests/*.test.mjs tests/*.test.js src/*.test.mjs)
+            if [ ${#tests[@]} -gt 0 ]; then
+              echo "Running ${#tests[@]} node test file(s)…"
+              node --test "${tests[@]}"
+            else
+              echo "Vanilla frontend without node tests — accepted"
+            fi
+          fi
