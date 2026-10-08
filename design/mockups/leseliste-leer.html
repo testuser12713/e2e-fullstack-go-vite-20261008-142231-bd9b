@@ -1,0 +1,570 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Leseliste — leer</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="page">
+    <header class="page-header" data-od-id="page-header">
+      <div class="page-header-inner">
+        <div class="page-header-title">
+          <h1 data-od-id="product-name">Leseliste</h1>
+          <p class="subtitle" data-od-id="product-subtitle">Bücher, Lesestatus und Bewertungen</p>
+        </div>
+        <aside class="stat-card" data-od-id="stat-card">
+          <span class="stat-label" data-od-id="stat-label">Gelesen im Jahr <span id="stat-year">2026</span></span>
+          <div class="stat-value" id="stat-value">
+            <span class="stat-number" id="stat-number">0</span>
+            <span class="stat-unit">Bücher</span>
+          </div>
+        </aside>
+      </div>
+    </header>
+
+    <main class="page-main">
+      <section class="book-form-card" aria-labelledby="form-title" data-od-id="create-form">
+        <h2 id="form-title" class="form-title">Neues Buch anlegen</h2>
+        <form id="create-form" novalidate>
+          <div class="form-grid">
+            <div class="field">
+              <label for="title">Titel</label>
+              <input id="title" class="field-input" data-od-id="create-title-input" type="text"
+                     placeholder="z. B. Der Zauberberg" autocomplete="off" aria-describedby="title-error">
+              <p class="field-error" id="title-error" hidden>Titel ist erforderlich.</p>
+            </div>
+            <div class="field">
+              <label for="author">Autor</label>
+              <input id="author" class="field-input" data-od-id="create-author-input" type="text"
+                     placeholder="z. B. Thomas Mann" autocomplete="off" aria-describedby="author-error">
+              <p class="field-error" id="author-error" hidden>Autor ist erforderlich.</p>
+            </div>
+            <div class="field">
+              <label for="status">Status</label>
+              <div class="select-wrap">
+                <select id="status" class="field-input" data-od-id="create-status-select">
+                  <option value="planned">Geplant</option>
+                  <option value="reading">Lese gerade</option>
+                  <option value="read">Gelesen</option>
+                </select>
+                <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                  <path d="m6 9 6 6 6-6"/>
+                </svg>
+              </div>
+            </div>
+            <div class="field">
+              <span class="field-label" id="rating-label">Bewertung</span>
+              <div class="star-group" role="group" aria-labelledby="rating-label" id="create-stars"></div>
+            </div>
+          </div>
+          <div class="form-footer">
+            <button type="submit" class="btn btn-primary" id="create-submit" data-od-id="create-submit" disabled>Hinzufügen</button>
+          </div>
+        </form>
+      </section>
+
+      <div class="toolbar-wrap">
+        <section class="toolbar" aria-label="Filter und Suche" data-od-id="filter-toolbar">
+          <div class="select-wrap toolbar-select">
+            <select id="filter-status" class="field-input" data-od-id="filter-status-select" aria-label="Status filtern">
+              <option value="">Alle</option>
+              <option value="planned">Geplant</option>
+              <option value="reading">Lese gerade</option>
+              <option value="read">Gelesen</option>
+            </select>
+            <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m6 9 6 6 6-6"/>
+            </svg>
+          </div>
+          <div class="search">
+            <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/>
+            </svg>
+            <input id="search" class="field-input search-input" data-od-id="search-input" type="search"
+                   placeholder="Titel oder Autor suchen" aria-label="Titel oder Autor suchen">
+            <button class="search-clear" id="search-clear" data-od-id="search-clear" hidden aria-label="Suche zurücksetzen">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                   stroke-width="2" stroke-linecap="round" aria-hidden="true">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+          <button class="btn btn-ghost" id="reset-filters" data-od-id="reset-filters" hidden>Filter zurücksetzen</button>
+        </section>
+
+        <p class="list-count" id="list-count" data-od-id="list-count" aria-live="polite">0 Bücher</p>
+
+        <div class="list-container" data-od-id="book-list">
+          <div id="list-rows"></div>
+        </div>
+      </div>
+
+      <footer class="screen-nav" data-od-id="screen-nav">
+        <a href="index.html">← Zur Screen-Übersicht</a>
+        <span style="color: var(--color-border_strong); margin: 0 8px;">·</span>
+        <a href="leseliste.html">Leseliste mit Büchern →</a>
+      </footer>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="edit-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="edit-title" data-od-id="edit-modal">
+      <div class="modal-header">
+        <h2 id="edit-title" class="modal-title">Buch bearbeiten</h2>
+        <button class="icon-btn" id="edit-close" aria-label="Dialog schließen">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6 6 18M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+      <form id="edit-form" novalidate>
+        <div class="form-grid">
+          <div class="field">
+            <label for="edit-title-input">Titel</label>
+            <input id="edit-title-input" class="field-input" type="text" autocomplete="off"
+                   aria-describedby="edit-title-error">
+            <p class="field-error" id="edit-title-error" hidden>Titel ist erforderlich.</p>
+          </div>
+          <div class="field">
+            <label for="edit-author-input">Autor</label>
+            <input id="edit-author-input" class="field-input" type="text" autocomplete="off"
+                   aria-describedby="edit-author-error">
+            <p class="field-error" id="edit-author-error" hidden>Autor ist erforderlich.</p>
+          </div>
+          <div class="field">
+            <label for="edit-status-select">Status</label>
+            <div class="select-wrap">
+              <select id="edit-status-select" class="field-input">
+                <option value="planned">Geplant</option>
+                <option value="reading">Lese gerade</option>
+                <option value="read">Gelesen</option>
+              </select>
+              <svg class="select-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m6 9 6 6 6-6"/>
+              </svg>
+            </div>
+          </div>
+          <div class="field">
+            <span class="field-label" id="edit-rating-label">Bewertung</span>
+            <div class="star-group" role="group" aria-labelledby="edit-rating-label" id="edit-stars"></div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" id="edit-cancel">Abbrechen</button>
+          <button type="submit" class="btn btn-primary" id="edit-submit">Speichern</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="delete-overlay" hidden>
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="delete-title" data-od-id="delete-modal">
+      <h2 id="delete-title" class="modal-title">Buch löschen?</h2>
+      <p class="modal-text" id="delete-text"></p>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" id="delete-cancel">Abbrechen</button>
+        <button class="btn btn-danger" id="delete-confirm">Löschen</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script>
+    (function () {
+      'use strict';
+
+      var NBSP = '\u202F';
+
+      var STATUS_META = {
+        planned: { label: 'Geplant', cls: 'status-planned' },
+        reading: { label: 'Lese gerade', cls: 'status-reading' },
+        read: { label: 'Gelesen', cls: 'status-read' }
+      };
+
+      function pad(n) { return String(n).padStart(2, '0'); }
+      function currentYear() { return new Date().getFullYear(); }
+      function todayISO() {
+        var d = new Date();
+        return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+      }
+      function formatDate(iso) {
+        if (!iso) return '\u2013';
+        var p = iso.split('-');
+        return p[2] + '.' + p[1] + '.' + p[0];
+      }
+
+      var books = [];
+      var filter = '';
+      var query = '';
+
+      function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, function (c) {
+          return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+        });
+      }
+
+      function starSvg(size, filled, outline) {
+        var fill = filled ? 'var(--color-star)' : (outline ? 'transparent' : 'var(--color-star_empty)');
+        var stroke = (!filled && outline) ? 'var(--color-star_empty)' : 'none';
+        return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" aria-hidden="true">' +
+          '<path d="M12 2.2l2.92 5.92 6.53.95-4.72 4.6 1.11 6.5L12 17.08l-5.84 3.09 1.11-6.5-4.72-4.6 6.53-.95L12 2.2z" ' +
+          'fill="' + fill + '" stroke="' + stroke + '" stroke-width="1.5" stroke-linejoin="round"/></svg>';
+      }
+
+      function ratingText(n) { return n > 0 ? n + ' von 5 Sternen' : 'Nicht bewertet'; }
+      function countLabel(n) { return n === 1 ? '1 Buch' : n + NBSP + 'Bücher'; }
+
+      function readOnlyStars(n) {
+        var s = '';
+        for (var i = 1; i <= 5; i++) { s += starSvg(16, i <= n, false); }
+        return '<span class="stars-ro" aria-hidden="true">' + s + '</span>';
+      }
+
+      var EDIT_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>';
+      var TRASH_ICON = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>';
+      var BOOK_GLYPH = '<svg class="empty-glyph" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--color-muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>';
+
+      function bookRowHtml(b) {
+        var meta = STATUS_META[b.status];
+        return '<div class="book-row" data-id="' + b.id + '" data-od-id="book-row-' + b.id + '">' +
+          '<div class="book-main">' +
+            '<div class="book-title">' + escapeHtml(b.title) + '</div>' +
+            '<div class="book-author">' + escapeHtml(b.author) + '</div>' +
+          '</div>' +
+          '<div class="book-meta">' +
+            '<span class="status-chip ' + meta.cls + '"><span class="dot"></span>' + meta.label + '</span>' +
+            '<span class="book-stars">' + readOnlyStars(b.rating) +
+              '<span class="sr-only">' + ratingText(b.rating) + '</span></span>' +
+            '<span class="book-date">' + formatDate(b.date) + '</span>' +
+          '</div>' +
+          '<div class="book-actions">' +
+            '<button class="icon-btn" data-action="edit" data-id="' + b.id + '" aria-label="Buch bearbeiten: ' + escapeHtml(b.title) + '" title="Buch bearbeiten: ' + escapeHtml(b.title) + '">' + EDIT_ICON + '</button>' +
+            '<button class="icon-btn icon-btn-danger" data-action="delete" data-id="' + b.id + '" aria-label="Buch löschen: ' + escapeHtml(b.title) + '" title="Buch löschen: ' + escapeHtml(b.title) + '">' + TRASH_ICON + '</button>' +
+          '</div>' +
+        '</div>';
+      }
+
+      function emptyStateHtml() {
+        if (books.length === 0) {
+          return '<div class="empty-state" data-od-id="empty-state">' + BOOK_GLYPH +
+            '<h3 class="empty-title">Noch keine Bücher</h3>' +
+            '<p class="empty-hint">Lege dein erstes Buch mit Titel und Autor an.</p></div>';
+        }
+        var parts = [];
+        if (filter) parts.push('Status: ' + STATUS_META[filter].label);
+        if (query.trim()) parts.push('Suche: „' + escapeHtml(query.trim()) + '“');
+        return '<div class="empty-state" data-od-id="empty-state-no-matches">' + BOOK_GLYPH +
+          '<h3 class="empty-title">Keine Treffer</h3>' +
+          '<p class="empty-hint">Keine Bücher für ' + parts.join(' · ') + '.</p>' +
+          '<button class="btn btn-ghost" id="empty-reset" type="button">Filter zurücksetzen</button></div>';
+      }
+
+      function renderStat() {
+        document.getElementById('stat-year').textContent = currentYear();
+        var y = currentYear();
+        var n = books.filter(function (b) {
+          return b.status === 'read' && b.date && b.date.indexOf(String(y)) === 0;
+        }).length;
+        document.getElementById('stat-number').textContent = String(n);
+      }
+
+      function renderList() {
+        var container = document.getElementById('list-rows');
+        var q = query.trim().toLowerCase();
+        var filtered = books.filter(function (b) {
+          var okStatus = !filter || b.status === filter;
+          var okQuery = !q || (b.title + ' ' + b.author).toLowerCase().indexOf(q) !== -1;
+          return okStatus && okQuery;
+        });
+
+        document.getElementById('list-count').textContent = countLabel(filtered.length);
+        document.getElementById('reset-filters').hidden = !(filter || query.trim());
+
+        if (filtered.length === 0) {
+          container.innerHTML = emptyStateHtml();
+          return;
+        }
+        container.innerHTML = filtered.map(bookRowHtml).join('');
+      }
+
+      function render() { renderStat(); renderList(); }
+
+      function initStarGroup(container) {
+        var rating = 0;
+        function paint() {
+          var buttons = container.querySelectorAll('.star-btn');
+          for (var i = 0; i < buttons.length; i++) {
+            var v = i + 1;
+            buttons[i].setAttribute('data-filled', v <= rating ? 'true' : 'false');
+            buttons[i].setAttribute('aria-pressed', v <= rating ? 'true' : 'false');
+            buttons[i].classList.remove('is-preview');
+          }
+        }
+        function preview(n) {
+          var buttons = container.querySelectorAll('.star-btn');
+          for (var i = 0; i < buttons.length; i++) {
+            var v = i + 1;
+            if (v <= n && v > rating) buttons[i].classList.add('is-preview');
+            else buttons[i].classList.remove('is-preview');
+          }
+        }
+        function build() {
+          container.innerHTML = '';
+          for (var i = 1; i <= 5; i++) {
+            (function (value) {
+              var btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'star-btn';
+              btn.setAttribute('aria-label', value + ' von 5 Sternen');
+              btn.innerHTML = starSvg(32, false, true);
+              btn.addEventListener('mouseenter', function () { preview(value); });
+              btn.addEventListener('mouseleave', paint);
+              btn.addEventListener('focus', function () { preview(value); });
+              btn.addEventListener('blur', paint);
+              btn.addEventListener('click', function () {
+                rating = (rating === value) ? 0 : value;
+                paint();
+              });
+              btn.addEventListener('keydown', function (e) {
+                if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+                  e.preventDefault();
+                  var next = value + (e.key === 'ArrowRight' ? 1 : -1);
+                  if (next < 1) next = 1;
+                  if (next > 5) next = 5;
+                  var all = container.querySelectorAll('.star-btn');
+                  all[next - 1].focus();
+                }
+              });
+              container.appendChild(btn);
+            })(i);
+          }
+          paint();
+        }
+        build();
+        return {
+          get: function () { return rating; },
+          set: function (v) { rating = v; paint(); }
+        };
+      }
+
+      var listRows = document.getElementById('list-rows');
+      var filterSelect = document.getElementById('filter-status');
+      var searchInput = document.getElementById('search');
+      var searchClear = document.getElementById('search-clear');
+      var resetFiltersBtn = document.getElementById('reset-filters');
+
+      var createForm = document.getElementById('create-form');
+      var titleInput = document.getElementById('title');
+      var authorInput = document.getElementById('author');
+      var createStatusSelect = document.getElementById('status');
+      var createStars = initStarGroup(document.getElementById('create-stars'));
+      var createSubmit = document.getElementById('create-submit');
+      var titleError = document.getElementById('title-error');
+      var authorError = document.getElementById('author-error');
+
+      function requiredOk(input, errorEl) {
+        var empty = !input.value.trim();
+        errorEl.hidden = !empty;
+        if (empty) input.setAttribute('aria-invalid', 'true');
+        else input.removeAttribute('aria-invalid');
+        return !empty;
+      }
+
+      function syncCreateSubmit() {
+        createSubmit.disabled = !(titleInput.value.trim() && authorInput.value.trim());
+      }
+
+      titleInput.addEventListener('input', function () {
+        if (titleInput.value.trim()) { titleError.hidden = true; titleInput.removeAttribute('aria-invalid'); }
+        syncCreateSubmit();
+      });
+      authorInput.addEventListener('input', function () {
+        if (authorInput.value.trim()) { authorError.hidden = true; authorInput.removeAttribute('aria-invalid'); }
+        syncCreateSubmit();
+      });
+      titleInput.addEventListener('blur', function () { requiredOk(titleInput, titleError); });
+      authorInput.addEventListener('blur', function () { requiredOk(authorInput, authorError); });
+
+      createForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var tOk = requiredOk(titleInput, titleError);
+        var aOk = requiredOk(authorInput, authorError);
+        if (!tOk || !aOk) return;
+        books.unshift({
+          id: 'b' + Date.now(),
+          title: titleInput.value.trim(),
+          author: authorInput.value.trim(),
+          status: createStatusSelect.value,
+          rating: createStars.get(),
+          date: createStatusSelect.value === 'read' ? todayISO() : null
+        });
+        render();
+        createForm.reset();
+        createStatusSelect.value = 'planned';
+        createStars.set(0);
+        titleError.hidden = true; authorError.hidden = true;
+        titleInput.removeAttribute('aria-invalid'); authorInput.removeAttribute('aria-invalid');
+        syncCreateSubmit();
+        showToast('Buch hinzugefügt');
+      });
+
+      filterSelect.addEventListener('change', function () {
+        filter = filterSelect.value;
+        render();
+      });
+      searchInput.addEventListener('input', function () {
+        query = searchInput.value;
+        searchClear.hidden = !searchInput.value;
+        render();
+      });
+      searchClear.addEventListener('click', function () {
+        searchInput.value = '';
+        query = '';
+        searchClear.hidden = true;
+        render();
+        searchInput.focus();
+      });
+      function resetFilters() {
+        filter = '';
+        query = '';
+        filterSelect.value = '';
+        searchInput.value = '';
+        searchClear.hidden = true;
+        render();
+      }
+      resetFiltersBtn.addEventListener('click', resetFilters);
+
+      listRows.addEventListener('click', function (e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        if (btn.id === 'empty-reset') { resetFilters(); return; }
+        var id = btn.getAttribute('data-id');
+        var action = btn.getAttribute('data-action');
+        if (!id || !action) return;
+        if (action === 'edit') openEdit(id);
+        else if (action === 'delete') openDelete(id);
+      });
+
+      var lastFocused = null;
+      function showOverlay(el) {
+        lastFocused = document.activeElement;
+        el.hidden = false;
+      }
+      function hideOverlay(el) {
+        el.hidden = true;
+        if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+      }
+      function trapFocus(overlay, e) {
+        if (e.key !== 'Tab') return;
+        var focusables = overlay.querySelectorAll('button, input, select, [tabindex]:not([tabindex="-1"])');
+        if (!focusables.length) return;
+        var first = focusables[0];
+        var last = focusables[focusables.length - 1];
+        if (e.shiftKey && document.activeElement === first) { last.focus(); e.preventDefault(); }
+        else if (!e.shiftKey && document.activeElement === last) { first.focus(); e.preventDefault(); }
+      }
+
+      var editOverlay = document.getElementById('edit-overlay');
+      var editForm = document.getElementById('edit-form');
+      var editTitleInput = document.getElementById('edit-title-input');
+      var editAuthorInput = document.getElementById('edit-author-input');
+      var editStatusSelect = document.getElementById('edit-status-select');
+      var editStars = initStarGroup(document.getElementById('edit-stars'));
+      var editTitleError = document.getElementById('edit-title-error');
+      var editAuthorError = document.getElementById('edit-author-error');
+      var editingId = null;
+
+      function openEdit(id) {
+        var b = books.find(function (x) { return x.id === id; });
+        if (!b) return;
+        editingId = id;
+        editTitleInput.value = b.title;
+        editAuthorInput.value = b.author;
+        editStatusSelect.value = b.status;
+        editStars.set(b.rating);
+        editTitleError.hidden = true; editAuthorError.hidden = true;
+        editTitleInput.removeAttribute('aria-invalid'); editAuthorInput.removeAttribute('aria-invalid');
+        showOverlay(editOverlay);
+        editTitleInput.focus();
+      }
+
+      document.getElementById('edit-close').addEventListener('click', function () { hideOverlay(editOverlay); });
+      document.getElementById('edit-cancel').addEventListener('click', function () { hideOverlay(editOverlay); });
+
+      editForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var tOk = requiredOk(editTitleInput, editTitleError);
+        var aOk = requiredOk(editAuthorInput, editAuthorError);
+        if (!tOk || !aOk) return;
+        var b = books.find(function (x) { return x.id === editingId; });
+        b.title = editTitleInput.value.trim();
+        b.author = editAuthorInput.value.trim();
+        b.status = editStatusSelect.value;
+        b.rating = editStars.get();
+        if (b.status === 'read') { if (!b.date) b.date = todayISO(); }
+        else { b.date = null; }
+        render();
+        hideOverlay(editOverlay);
+        showToast('Änderungen gespeichert');
+      });
+
+      var deleteOverlay = document.getElementById('delete-overlay');
+      var deleteText = document.getElementById('delete-text');
+      var deleteId = null;
+
+      function openDelete(id) {
+        var b = books.find(function (x) { return x.id === id; });
+        if (!b) return;
+        deleteId = id;
+        deleteText.textContent = 'Möchtest du „' + b.title + '“ wirklich löschen?';
+        showOverlay(deleteOverlay);
+        document.getElementById('delete-confirm').focus();
+      }
+
+      document.getElementById('delete-cancel').addEventListener('click', function () { hideOverlay(deleteOverlay); });
+      document.getElementById('delete-confirm').addEventListener('click', function () {
+        books = books.filter(function (b) { return b.id !== deleteId; });
+        render();
+        hideOverlay(deleteOverlay);
+        showToast('Buch gelöscht');
+      });
+
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+          if (!editOverlay.hidden) hideOverlay(editOverlay);
+          else if (!deleteOverlay.hidden) hideOverlay(deleteOverlay);
+        } else if (e.key === 'Tab') {
+          if (!editOverlay.hidden) trapFocus(editOverlay, e);
+          else if (!deleteOverlay.hidden) trapFocus(deleteOverlay, e);
+        }
+      });
+
+      var toast = document.getElementById('toast');
+      var toastTimer = null;
+      function showToast(msg) {
+        toast.textContent = msg;
+        toast.hidden = false;
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function () { toast.hidden = true; }, 3000);
+      }
+
+      var toolbar = document.querySelector('.toolbar');
+      function onScroll() {
+        toolbar.classList.toggle('is-stuck', window.scrollY > 8);
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+      onScroll();
+
+      render();
+    })();
+  </script>
+</body>
+</html>
