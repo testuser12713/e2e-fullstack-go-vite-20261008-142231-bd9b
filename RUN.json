@@ -1,0 +1,21 @@
+{
+  "runcontract": 1,
+  "services": [
+    {
+      "name": "api",
+      "dir": "backend",
+      "stack": "go",
+      "kind": "server",
+      "build": [["go", "build", "./..."]],
+      "test": [["go", "test", "./..."]],
+      "start": ["go", "run", "."],
+      "port": 8080,
+      "port_env": "PORT",
+      "health": { "path": "/api/health", "expect_status": [200] },
+      "env": {
+        "PORT": { "dev": "8080" },
+        "BOOKS_FILE": { "dev": "data/books.json" }
+      }
+    }
+  ]
+}
