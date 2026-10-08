@@ -625,11 +625,38 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
+.stat-card__number {
+  font-family: var(--font-heading);
+}
+
 .stat-card__unit {
   font-family: var(--font-body);
   font-size: 15px;
   font-weight: 400;
   color: var(--color-muted);
+}
+
+.stat-card__value--loading {
+  opacity: 0.6;
+}
+
+.stat-card__spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid color-mix(in srgb, var(--color-accent) 30%, transparent);
+  border-top-color: var(--color-accent);
+  border-radius: var(--radius-pill);
+  animation: stat-card-spin 0.7s linear infinite;
+}
+
+@keyframes stat-card-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.stat-card__error {
+  margin-top: var(--space-1);
 }
 
 /* EmptyState */
