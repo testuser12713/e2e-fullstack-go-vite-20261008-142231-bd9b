@@ -491,6 +491,12 @@ h3 {
 }
 
 /* Book list & row */
+.book-list-region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
 .book-list {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
@@ -514,6 +520,10 @@ h3 {
 
 .book-row:hover {
   background: var(--color-surface_alt);
+}
+
+.book-row__meta {
+  display: contents;
 }
 
 .book-row__title {
